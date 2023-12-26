@@ -7,9 +7,9 @@ from utils import DLT, get_projection_matrix, write_keypoints_to_disk
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 
-frame_shape = [720, 1280]
+frame_shape = [1920, 1080]
 
-def run_mp(input_stream1, input_stream2, P0, P1):
+def run_mp(input_stream1, input_stream2):#, P0, P1):
     #input video stream
     cap0 = cv.VideoCapture(input_stream1)
     cap1 = cv.VideoCapture(input_stream2)
@@ -92,20 +92,20 @@ def run_mp(input_stream1, input_stream2, P0, P1):
 
 
         #calculate 3d position
-        frame_p3ds = []
-        for uv1, uv2 in zip(frame0_keypoints, frame1_keypoints):
-            if uv1[0] == -1 or uv2[0] == -1:
-                _p3d = [-1, -1, -1]
-            else:
-                _p3d = DLT(P0, P1, uv1, uv2) #calculate 3d position of keypoint
-            frame_p3ds.append(_p3d)
+        # frame_p3ds = []
+        # for uv1, uv2 in zip(frame0_keypoints, frame1_keypoints):
+            # if uv1[0] == -1 or uv2[0] == -1:
+                # _p3d = [-1, -1, -1]
+            # else:
+                # _p3d = DLT(P0, P1, uv1, uv2) #calculate 3d position of keypoint
+            # frame_p3ds.append(_p3d)
 
-        '''
-        This contains the 3d position of each keypoint in current frame.
-        For real time application, this is what you want.
-        '''
-        frame_p3ds = np.array(frame_p3ds).reshape((21, 3))
-        kpts_3d.append(frame_p3ds)
+        # '''
+        # This contains the 3d position of each keypoint in current frame.
+        # For real time application, this is what you want.
+        # '''
+        # frame_p3ds = np.array(frame_p3ds).reshape((21, 3))
+        # kpts_3d.append(frame_p3ds)
 
         # Draw the hand annotations on the image.
         frame0.flags.writeable = True
@@ -131,22 +131,22 @@ def run_mp(input_stream1, input_stream2, P0, P1):
     for cap in caps:
         cap.release()
 
-    return np.array(kpts_cam0), np.array(kpts_cam1), np.array(kpts_3d)
+    return np.array(kpts_cam0), np.array(kpts_cam1)#, np.array(kpts_3d)
 
 if __name__ == '__main__':
 
-    input_stream1 = 'media/cam0_test.mp4'
-    input_stream2 = 'media/cam1_test.mp4'
+    input_stream1 = 'media/test2.mp4'
+    input_stream2 = 'media/test3.mp4'
 
     if len(sys.argv) == 3:
         input_stream1 = int(sys.argv[1])
         input_stream2 = int(sys.argv[2])
 
     #projection matrices
-    P0 = get_projection_matrix(0)
-    P1 = get_projection_matrix(1)
+    # P0 = get_projection_matrix(0)
+    # P1 = get_projection_matrix(1)
 
-    kpts_cam0, kpts_cam1, kpts_3d = run_mp(input_stream1, input_stream2, P0, P1)
+    kpts_cam0, kpts_cam1, kpts_3d = run_mp(input_stream1, input_stream2)#, P0, P1)
 
     #this will create keypoints file in current working folder
     #write_keypoints_to_disk('kpts_cam0.dat', kpts_cam0)

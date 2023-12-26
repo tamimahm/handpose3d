@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from utils import DLT
-
+import cv2
+import glob
 def read_keypoints(filename):
     fin = open(filename, 'r')
 
@@ -31,16 +32,26 @@ def visualize_3d(p3ds):
                     [0.,  0., -1.]]))
 
     p3ds_rotated = []
-    for frame in p3ds:
+    
+    for i in range(p3ds.shape[2]):
         frame_kpts_rotated = []
-        for kpt in frame:
+        frame=p3ds[:,:,i]
+        for k in range(frame.shape[0]):
+            kpt=frame[k,:]
             kpt_rotated = Rz @ Rx @ kpt
+            #kpt_rotated = kpt
             frame_kpts_rotated.append(kpt_rotated)
         p3ds_rotated.append(frame_kpts_rotated)
 
     """this contains 3d points of each frame"""
     p3ds_rotated = np.array(p3ds_rotated)
-
+    z_max=np.max(p3ds_rotated[:,:,2])
+    z_min=np.min(p3ds_rotated[:,:,2])
+    x_max=np.max(p3ds_rotated[:,:,0])
+    x_min=np.min(p3ds_rotated[:,:,0])
+    y_max=np.max(p3ds_rotated[:,:,1])
+    y_min=np.min(p3ds_rotated[:,:,1])
+    print(p3ds_rotated.shape)
     """Now visualize in 3D"""
     thumb_f = [[0,1],[1,2],[2,3],[3,4]]
     index_f = [[0,5],[5,6],[6,7],[7,8]]
@@ -62,29 +73,33 @@ def visualize_3d(p3ds):
                 ax.plot(xs = [kpts3d[_c[0],0], kpts3d[_c[1],0]], ys = [kpts3d[_c[0],1], kpts3d[_c[1],1]], zs = [kpts3d[_c[0],2], kpts3d[_c[1],2]], linewidth = 4, c = finger_color)
 
         #draw axes
-        ax.plot(xs = [0,5], ys = [0,0], zs = [0,0], linewidth = 2, color = 'red')
-        ax.plot(xs = [0,0], ys = [0,5], zs = [0,0], linewidth = 2, color = 'blue')
-        ax.plot(xs = [0,0], ys = [0,0], zs = [0,5], linewidth = 2, color = 'black')
+        ax.plot(xs = [0,10], ys = [0,0], zs = [0,0], linewidth = 2, color = 'red')
+        ax.plot(xs = [0,0], ys = [0,10], zs = [0,0], linewidth = 2, color = 'blue')
+        ax.plot(xs = [0,0], ys = [0,0], zs = [0,10], linewidth = 2, color = 'black')
 
         #ax.set_axis_off()
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_zticks([])
 
-        ax.set_xlim3d(-7, 8)
+        ax.set_xlim3d(x_min, x_max)
         ax.set_xlabel('x')
-        ax.set_ylim3d(-7, 8)
+        ax.set_ylim3d(y_min, y_max)
         ax.set_ylabel('y')
-        ax.set_zlim3d(0, 15)
+        ax.set_zlim3d(z_min, z_max)
         ax.set_zlabel('z')
         ax.elev = 0.2*i
         ax.azim = 0.2*i
-        plt.savefig('figs/fig_' + str(i) + '.png')
+        plt.savefig('media/images/fig_' + str(i) + '.png')
         plt.pause(0.01)
         ax.cla()
 
-
 if __name__ == '__main__':
-
-    p3ds = read_keypoints('kpts_3d.dat')
+    import scipy.io
+    import numpy as np
+    file_path = 'data.mat'
+    data = scipy.io.loadmat(file_path)
+    p3ds=data['point3d']
+    print(data['point3d'].shape)
+    #p3ds = read_keypoints('filename.dat')
     visualize_3d(p3ds)
